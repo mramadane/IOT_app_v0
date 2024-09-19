@@ -1,16 +1,25 @@
-from .StandardVariable import StandardVariable
-from typing import List, Tuple
+from typing_extensions import ParamSpecKwargs
+import datetime
+import math
+import random
+import matplotlib.pyplot as plt
+from typing import Any, Dict, List, Tuple, Set
+from abc import ABC, abstractmethod
 
-class State:
-    def __init__(self, time: float):
-        self.time = StandardVariable({"type": "time"}, time)
-        self.standard_variables = []
+class States:
+    def __init__(self):
+        self.states: Dict[str, Tuple[Any, bool, bool]] = {
+            "Time": (datetime.timedelta(), False, True)
+        }
 
-    def add_state(self, standard_variable: StandardVariable):
-        self.standard_variables.append(standard_variable)
+    def get_states(self, name: str) -> Any:
+        return self.states[name][0]
 
-    def get_states(self) -> Tuple[List[StandardVariable], StandardVariable]:
-        return self.standard_variables, self.time
+    def set_states(self, name: str, value =None, current_time: datetime.timedelta=None,
+                   is_configurable: bool = False, is_readable: bool = False) -> None:
+        self.states[name] = (value, is_configurable, is_readable)
 
-    def set_time(self, time: float):
-        self.time.value = time
+    def delete_state(self, name: str, current_time: datetime.timedelta) -> None:
+        if name != "Time":
+            del self.states[name]
+        self.states["Time"] = (current_time, True, True)

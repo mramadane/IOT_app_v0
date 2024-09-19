@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>ba28d983-03e2-4589-bd70-17d55268577d</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>IOT_v0.py</StartupFile>
+    <StartupFile>IOT_alpha1.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -23,14 +23,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="core_module\Agent.py" />
-    <Compile Include="core_module\IOTsystem.py" />
-    <Compile Include="core_module\Messgae.py" />
-    <Compile Include="core_module\Port.py" />
-    <Compile Include="core_module\ScheduleEvent.py" />
-    <Compile Include="core_module\Scheduler.py" />
+    <Compile Include="core_module\Checker.py" />
+    <Compile Include="core_module\connections.py" />
+    <Compile Include="core_module\module1.py" />
+    <Compile Include="core_module\Scenario.py" />
     <Compile Include="core_module\State.py" />
-    <Compile Include="core_module\StandardVariable.py" />
-    <Compile Include="IOT_v0.py" />
+    <Compile Include="IOT_alpha1.py" />
     <Compile Include="Viz\viz.py" />
   </ItemGroup>
   <ItemGroup>

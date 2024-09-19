@@ -1,7 +1,9 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\core_module",
+    "\\core_module\\__pycache__"
   ],
-  "SelectedNode": "\\C:\\Users\\thami\\Source\\Repos\\IOT_app_v0",
+  "SelectedNode": "\\core_module\\__pycache__\\v2_script.py",
   "PreviewInSolutionExplorer": false
 }
