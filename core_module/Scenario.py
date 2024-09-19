@@ -1,4 +1,6 @@
 from typing_extensions import ParamSpecKwargs
+from core_module.Agent import Agent
+from core_module.connections import Connections
 import datetime
 import math
 import random
@@ -61,13 +63,14 @@ class Scenario:
           self.messages.extend(agent.get_message_out())         
         while self.simulation_time < self.simulation_length:
             if not self.messages:
-                #print("should never happen")
                 self.simulation_time += self.minimum_step
                 continue
             next_event_time = min(msg[2] for msg in self.messages)
             self.simulation_time = next_event_time
-            messages_to_deliver = [msg for msg in self.messages if msg[2] <=( self.simulation_time+2*self.minimum_step)]
-            self.messages = [msg for msg in self.messages if msg[2] > (self.simulation_time+2*self.minimum_step)]
+            print("BEFORE WHOLE MESSAGES", self.messages)
+            print("SIMULATION TIME",self.simulation_time)
+            messages_to_deliver = [msg for msg in self.messages if msg[2] <=( self.simulation_time)]
+            self.messages = [msg for msg in self.messages if msg[2] > (self.simulation_time)]
         # Distribute messages to agents
             for msg in messages_to_deliver:
                 conn_id, content, _ = msg
@@ -82,9 +85,8 @@ class Scenario:
 
             # Collect agents that have messages to process
             agents_to_process = [agent for agent in self.agents if (len(agent.queue)>0)]
-            print("LEN OF AGENT TO PROCESS",len(agents_to_process))
             # Call handler only on agents with messages
             for agent in agents_to_process:
                 agent.handler()
                 self.messages.extend(agent.get_message_out())
-                print("F MESSAGES",self.messages)
+            print("END LOOP",self.messages)

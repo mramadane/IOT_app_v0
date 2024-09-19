@@ -9,17 +9,16 @@ from abc import ABC, abstractmethod
 class States:
     def __init__(self):
         self.states: Dict[str, Tuple[Any, bool, bool]] = {
-            "Time": (datetime.timedelta(), False, True)
+            "Time": datetime.timedelta()
         }
 
-    def get_states(self, name: str) -> Any:
-        return self.states[name][0]
+    def get_state(self, name: str) -> Any:
+        return self.states[name]
 
-    def set_states(self, name: str, value =None, current_time: datetime.timedelta=None,
+    def set_state(self, name: str, value =None, current_time: datetime.timedelta=None,
                    is_configurable: bool = False, is_readable: bool = False) -> None:
-        self.states[name] = (value, is_configurable, is_readable)
+        self.states[name] = value
 
     def delete_state(self, name: str, current_time: datetime.timedelta) -> None:
         if name != "Time":
             del self.states[name]
-        self.states["Time"] = (current_time, True, True)

@@ -11,7 +11,7 @@
     <OutputPath>.</OutputPath>
     <Name>IOT_v0</Name>
     <RootNamespace>IOT_v0</RootNamespace>
-    <InterpreterId>CondaEnv|CondaEnv|Testdog</InterpreterId>
+    <InterpreterId>CondaEnv|CondaEnv|GraphIOT2</InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -26,6 +26,7 @@
     <Compile Include="core_module\Checker.py" />
     <Compile Include="core_module\connections.py" />
     <Compile Include="core_module\module1.py" />
+    <Compile Include="core_module\module2.py" />
     <Compile Include="core_module\Scenario.py" />
     <Compile Include="core_module\State.py" />
     <Compile Include="IOT_alpha1.py" />
@@ -37,6 +38,7 @@
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="CondaEnv|CondaEnv|GraphIOT2" />
+    <InterpreterReference Include="CondaEnv|CondaEnv|IOTapp" />
     <InterpreterReference Include="CondaEnv|CondaEnv|Testdog" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />

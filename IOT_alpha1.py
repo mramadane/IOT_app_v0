@@ -1,5 +1,7 @@
 
-from core_module import *
+from core_module.Agent import Agent
+from core_module.Scenario import Scenario
+from core_module.Checker import Checker
 from typing_extensions import ParamSpecKwargs
 import datetime
 import math
@@ -53,26 +55,27 @@ class EnvironmentAgent(Agent):
         return "sensing" in target_metadata or "actuating" in target_metadata
 
     def handler(self):
-      if(len(self.queue)>0):
-        print("at least we get something")
-        for message in self.queue:
-            conn_id, content, msg_time = message
+        while self.queue:
+            message=self.queue.pop(0)
+            conn_id_r, content, msg_time = message
             self.update_room_temperature(msg_time)
             if isinstance(content, dict):
                 if "sensing" in content:
                     if content["sensing"].get("message_type") == "request":
-                        print("intota")
                         temperature = self.get_state("RoomTemperature")
-                        print("msg time is",msg_time)
-                        self.send_message((conn_id, {"sensing": {"temperature": temperature}}, msg_time))
-                        print("THE MEESSS",self.out_messages)
+                        for conn_id,conn_info in self.connections.items():
+                          source_agent_id=conn_info["source_device"]
+                          source_agent_meta=conn_info["metadata_source"]                          
+                          target_agent_id = conn_info["target_device"]
+                          target_agent_meta = conn_info["metadata_target"]
+                          if target_agent_meta.get("device_name") == "TempSensor":
+                            self.send_message((conn_id, {"sensing": {"temperature": temperature}}, msg_time))
                 elif "actuating" in content:
+                  pass
                     # Update supply and return temperatures based on actuator input
-                    self.set_state("SupplyTemperature", content["actuating"].get("supply_temperature", self.get_state("SupplyTemperature")))
-                    self.set_state("ReturnTemperature", content["actuating"].get("return_temperature", self.get_state("ReturnTemperature")))
+                    #self.set_state("SupplyTemperature", content["actuating"].get("supply_temperature", self.get_state("SupplyTemperature")))
+                    #self.set_state("ReturnTemperature", content["actuating"].get("return_temperature", self.get_state("ReturnTemperature")))
             self.set_state("Time", msg_time)
-            print("we get msg",msg_time)
-        self.queue=[]                    
 
 
 
@@ -127,7 +130,6 @@ class SensorAgent(Agent):
         super().__init__()
         self.set_state("SamplingInterval", datetime.timedelta(minutes=15))
         self.set_state("Time", datetime.timedelta())
-        self.set_state("NextSampleTime", datetime.timedelta())
         self.metadata = {
             "device_name": "TempSensor",
             "manufacturer": "SensorCo",
@@ -162,26 +164,34 @@ class SensorAgent(Agent):
                   self.send_message((conn_id, {"sensing": {"message_type": "request"}}, self.get_state("SamplingInterval")+self.get_state("Time")))
                   break
       else:
-        print("FULL SENS")
-        for message in self.queue:
-            conn_id, content, msg_time = message
-            
+        while self.queue:
+            message=self.queue.pop(0)
+            conn_id_r, content, msg_time = message
             if isinstance(content, dict):
                 if "sensing" in content:
                     temperature = content["sensing"].get("temperature")
                     if temperature is not None:
                         # Send temperature data to controller via Bluetooth
-                        for conn_id in self.connections:
-                            self.send_message((conn_id, {"protocols": {"Bluetooth": {"temperature": temperature}}}, msg_time))
-                        
-                        # Schedule next sensing request
-                        next_sample_time = msg_time + self.get_state("SamplingInterval")
-                        self.set_state("NextSampleTime", next_sample_time)
-                        self.send_message((conn_id, {"sensing": {"message_type": "request"}}, next_sample_time))
+                        for conn_id,conn_info in self.connections.items():
+                          source_agent_id=conn_info["source_device"]
+                          source_agent_meta=conn_info["metadata_source"]                          
+                          target_agent_id = conn_info["target_device"]
+                          target_agent_meta = conn_info["metadata_target"]
+                          #print("the con names",target_agent_meta.get("device_name"))
+                          if target_agent_meta.get("device_name") == "TempController":
+                             self.send_message((conn_id, {"protocols": {"Bluetooth": {"temperature": temperature}}}, msg_time))
+            for conn_id,conn_info in self.connections.items():
+              source_agent_id=conn_info["source_device"]
+              source_agent_meta=conn_info["metadata_source"]                          
+              target_agent_id = conn_info["target_device"]
+              target_agent_meta = conn_info["metadata_target"]
+              #print("the con names",target_agent_meta.get("device_name"))
+              if target_agent_meta.get("device_name") == "Room":                       
+                next_sample_time = msg_time + self.get_state("SamplingInterval")
+                self.send_message((conn_id, {"sensing": {"message_type": "request"}}, next_sample_time))
         
             # Update the Time state at the end
             self.set_state("Time", msg_time)
-        self.queue=[]
 
 
 
@@ -216,26 +226,25 @@ class ActuatorAgent(Agent):
                 "actuating" in target_metadata)
 
     def handler(self):
-      if(len(self.queue)>0):
-        for message in self.queue:
-            conn_id, content, msg_time = message
-            if isinstance(content, dict) and "protocols" in content:
-                bluetooth_data = content["protocols"].get("Bluetooth", {})
-                control_signal = bluetooth_data.get("control_signal")
-                if control_signal is not None:
-                    # Update supply and return temperatures based on control signal
-                    # This is a simplification; in reality, you'd have a more complex model
-                    self.set_state("SupplyTemperature", 70 + control_signal / 100)
-                    self.set_state("ReturnTemperature", 50 + control_signal / 200)
-                    
-                    # Send actuation command to environment
-                    for conn_id in self.connections:
-                        self.send_message((conn_id, {"actuating": {
-                            "supply_temperature": self.get_state("SupplyTemperature"),
-                            "return_temperature": self.get_state("ReturnTemperature")
-                        }}, msg_time))
-            self.set_state("Time", msg_time)
-        self.queue=[]    
+      while self.queue:
+        message=self.queue.pop(0)
+        conn_id, content, msg_time = message
+        if isinstance(content, dict) and "protocols" in content:
+            bluetooth_data = content["protocols"].get("Bluetooth", {})
+            control_signal = bluetooth_data.get("control_signal")
+            if control_signal is not None:
+                # Update supply and return temperatures based on control signal
+                # This is a simplification; in reality, you'd have a more complex model
+                self.set_state("SupplyTemperature", 70 + control_signal / 100)
+                self.set_state("ReturnTemperature", 50 + control_signal / 200)
+                
+                # Send actuation command to environment
+                for conn_id in self.connections:
+                    self.send_message((conn_id, {"actuating": {
+                        "supply_temperature": self.get_state("SupplyTemperature"),
+                        "return_temperature": self.get_state("ReturnTemperature")
+                    }}, msg_time))
+        self.set_state("Time", msg_time)
 
 class ControllerAgent(Agent):
     def __init__(self):
@@ -262,37 +271,34 @@ class ControllerAgent(Agent):
         return "Bluetooth" in target_metadata.get("protocols", {})
 
     def handler(self):
-      if(len(self.queue)>0):
-        for message in self.queue:
-            conn_id, content, msg_time = message
-            print("CONTROL MESSAGE",content)
-            print("MESSAGE TIME",msg_time)
-            if isinstance(content, dict) and "protocols" in content:
-                bluetooth_data = content["protocols"].get("Bluetooth", {})
-                temperature = bluetooth_data.get("temperature")
-                if temperature is not None:
-                    # Store temperature data
-                    temp_data = self.get_state("TemperatureData")
-                    temp_data.append((msg_time, temperature))
-                    self.set_state("TemperatureData", temp_data)
+      while self.queue:
+          message=self.queue.pop(0)
+          conn_id, content, msg_time = message
+          if isinstance(content, dict) and "protocols" in content:
+              bluetooth_data = content["protocols"].get("Bluetooth", {})
+              temperature = bluetooth_data.get("temperature")
+              if temperature is not None:
+                  # Store temperature data
+                  temp_data = self.get_state("TemperatureData")
+                  temp_data.append((msg_time, temperature))
+                  self.set_state("TemperatureData", temp_data)
 
-                    # Check if it's time to compute a new control signal
-                    if msg_time - self.get_state("LastControlTime") >= self.get_state("ControlInterval"):
-                        supply_temperature = self.compute_control_signal(temperature)
-                        
-                        # Send control signal to actuator
-                        for conn_id in self.connections:
-                            self.send_message((conn_id, {
-                                "protocols": {
-                                    "Bluetooth": {
-                                        "control_signal": supply_temperature
-                                    }
-                                }
-                            }, msg_time))
-                        
-                        self.set_state("LastControlTime", msg_time)
-            self.set_state("Time", msg_time)
-        self.queue=[]  
+                  # Check if it's time to compute a new control signal
+                  if msg_time - self.get_state("LastControlTime") >= self.get_state("ControlInterval"):
+                      supply_temperature = self.compute_control_signal(temperature)
+                      
+                      # Send control signal to actuator
+                      for conn_id in self.connections:
+                          self.send_message((conn_id, {
+                              "protocols": {
+                                  "Bluetooth": {
+                                      "control_signal": supply_temperature
+                                  }
+                              }
+                          }, msg_time))
+                      
+                      self.set_state("LastControlTime", msg_time)
+          self.set_state("Time", msg_time) 
 
     def compute_control_signal(self, current_temperature: float) -> float:
         target_temp = self.get_state("TargetTemperature")
@@ -305,7 +311,6 @@ class ControllerAgent(Agent):
         supply_temperature = max(50, min(supply_temperature, 100))
         
         return supply_temperature
-
 def create_agents() -> Tuple[EnvironmentAgent, SensorAgent, ActuatorAgent, ControllerAgent]:
     environment = EnvironmentAgent()
     sensor = SensorAgent()
@@ -420,7 +425,6 @@ def main():
 
     # Create agents
     environment, sensor, actuator, controller = create_agents()
-    
     # Add agents to the scenario
     for agent in [environment, sensor, actuator, controller]:
         scenario.add_agent(agent)

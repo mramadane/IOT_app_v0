@@ -63,3 +63,4 @@ class Checker:
         elif expected_type == "boolean":
             return isinstance(value, bool)
         return False
+
