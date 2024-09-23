@@ -1,4 +1,3 @@
-from typing_extensions import ParamSpecKwargs
 from core_module.Agent import Agent
 from core_module.connections import Connections
 import datetime
@@ -8,6 +7,7 @@ import matplotlib.pyplot as plt
 from typing import Any, Dict, List, Tuple, Set
 from abc import ABC, abstractmethod
 
+# Adjusted Scenario class
 class Scenario:
     def __init__(self):
         self.agents: List[Agent] = []
@@ -60,15 +60,13 @@ class Scenario:
         for agent in self.agents:
           agent.set_state("Time", self.simulation_time)
           agent.handler()
-          self.messages.extend(agent.get_message_out())         
+          self.messages.extend(agent.get_message_out())
         while self.simulation_time < self.simulation_length:
             if not self.messages:
                 self.simulation_time += self.minimum_step
                 continue
             next_event_time = min(msg[2] for msg in self.messages)
             self.simulation_time = next_event_time
-            print("BEFORE WHOLE MESSAGES", self.messages)
-            print("SIMULATION TIME",self.simulation_time)
             messages_to_deliver = [msg for msg in self.messages if msg[2] <=( self.simulation_time)]
             self.messages = [msg for msg in self.messages if msg[2] > (self.simulation_time)]
         # Distribute messages to agents
@@ -89,4 +87,3 @@ class Scenario:
             for agent in agents_to_process:
                 agent.handler()
                 self.messages.extend(agent.get_message_out())
-            print("END LOOP",self.messages)

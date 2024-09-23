@@ -11,7 +11,7 @@
     <OutputPath>.</OutputPath>
     <Name>IOT_v0</Name>
     <RootNamespace>IOT_v0</RootNamespace>
-    <InterpreterId>CondaEnv|CondaEnv|GraphIOT2</InterpreterId>
+    <InterpreterId>CondaEnv|CondaEnv|IOTapp</InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -25,15 +25,16 @@
     <Compile Include="core_module\Agent.py" />
     <Compile Include="core_module\Checker.py" />
     <Compile Include="core_module\connections.py" />
-    <Compile Include="core_module\module1.py" />
     <Compile Include="core_module\module2.py" />
     <Compile Include="core_module\Scenario.py" />
     <Compile Include="core_module\State.py" />
+    <Compile Include="example_module\scenarioClasses.py" />
     <Compile Include="IOT_alpha1.py" />
     <Compile Include="Viz\viz.py" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="core_module\" />
+    <Folder Include="example_module\" />
     <Folder Include="Viz\" />
   </ItemGroup>
   <ItemGroup>

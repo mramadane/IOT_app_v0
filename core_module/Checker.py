@@ -26,7 +26,7 @@ class Checker:
                 self._check_value(data[key], value_schema, new_path, errors)
             elif value_schema.get("required", False):
                 errors.append(f"Missing required field: {new_path}")
-        
+
         # Check for extra keys
         for key in data:
             if key not in schema and "*" not in schema:
