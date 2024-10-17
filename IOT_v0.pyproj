@@ -4,14 +4,14 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>ba28d983-03e2-4589-bd70-17d55268577d</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>IOT_v0.py</StartupFile>
+    <StartupFile>IOT_alpha1.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>IOT_v0</Name>
     <RootNamespace>IOT_v0</RootNamespace>
-    <InterpreterId>CondaEnv|CondaEnv|Testdog</InterpreterId>
+    <InterpreterId>CondaEnv|CondaEnv|IOTapp</InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -23,22 +23,23 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="core_module\Agent.py" />
-    <Compile Include="core_module\IOTsystem.py" />
-    <Compile Include="core_module\Messgae.py" />
-    <Compile Include="core_module\Port.py" />
-    <Compile Include="core_module\ScheduleEvent.py" />
-    <Compile Include="core_module\Scheduler.py" />
+    <Compile Include="core_module\Checker.py" />
+    <Compile Include="core_module\connections.py" />
+    <Compile Include="core_module\module2.py" />
+    <Compile Include="core_module\Scenario.py" />
     <Compile Include="core_module\State.py" />
-    <Compile Include="core_module\StandardVariable.py" />
-    <Compile Include="IOT_v0.py" />
+    <Compile Include="example_module\scenarioClasses.py" />
+    <Compile Include="IOT_alpha1.py" />
     <Compile Include="Viz\viz.py" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="core_module\" />
+    <Folder Include="example_module\" />
     <Folder Include="Viz\" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="CondaEnv|CondaEnv|GraphIOT2" />
+    <InterpreterReference Include="CondaEnv|CondaEnv|IOTapp" />
     <InterpreterReference Include="CondaEnv|CondaEnv|Testdog" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
